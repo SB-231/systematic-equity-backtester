@@ -1,0 +1,22 @@
+universe:
+  tickers:
+    - AAPL
+    - MSFT
+    - AMZN
+    - META
+    - GOOG
+
+dates:
+  start: "2018-01-01"
+  end: "2024-12-31"
+
+data:
+  source: "stooq"
+  frequency: "daily"
+
+execution:
+  trade_at: "next_close"
+
+costs:
+  commission_bps: 1.0
+  slippage_bps: 1.0
