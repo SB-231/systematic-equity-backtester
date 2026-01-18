@@ -15,3 +15,11 @@ venv/
 .DS_Store
 .vscode/
 .idea/
+
+# Raw datasets (do not commit)
+data_raw/
+data_raw/**
+
+# Cache
+.cache/
+.cache/*.npz
