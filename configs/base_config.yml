@@ -4,11 +4,16 @@ universe:
     - MSFT
     - AMZN
     - META
-    - GOOG
+    - NVDA
+    - GOOGL
+    - TSLA
+    - AVGO
+    - COST
+    - NFLX
 
 dates:
-  start: "2018-01-01"
-  end: "2024-12-31"
+  start: "2025-01-01"
+  end: "2026-12-31"
 
 data:
   source: "stooq"
