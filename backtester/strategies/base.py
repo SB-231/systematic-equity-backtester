@@ -9,7 +9,13 @@ class Strategy(ABC):
         """
         Input:
             close: np.ndarray [T, N] close prices
+
         Output:
-            weights: np.ndarray [T, N] target weights (sum to 1 for long-only)
+            weights: np.ndarray [T, N] target portfolio weights.
+
+        Notes:
+            - Long-only strategies typically have weights >= 0 and sum(weights[t]) ~= 1.
+            - Long/short strategies may have negative weights and non-1 gross exposure.
+            - The engine will apply a 1-day execution lag to prevent lookahead.
         """
         raise NotImplementedError
