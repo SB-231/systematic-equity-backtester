@@ -11,13 +11,13 @@ universe:
     - COST
     - NFLX
 
-dates:
-  start: "2025-01-01"
-  end: "2026-12-31"
-
 data:
   source: "stooq"
   frequency: "daily"
+  
+dates:
+  start: "2025-01-01"
+  end: "2026-12-31"
 
 execution:
   trade_at: "next_close"
@@ -25,3 +25,11 @@ execution:
 costs:
   commission_bps: 1.0
   slippage_bps: 1.0
+  cost_bps: 10.0
+
+strategy:
+  name: cross_sectional_momentum
+  lookback: 20
+  top_k: 3
+
+  

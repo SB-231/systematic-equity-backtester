@@ -22,41 +22,86 @@ def max_drawdown(equity: np.ndarray) -> float:
     return float(dd.min())
 
 
+def _metrics(daily: np.ndarray, equity: np.ndarray) -> tuple:
+    total_return = float(equity[-1] - 1.0)
+    vol = float(np.std(daily) * np.sqrt(252))
+    sharpe = float((np.mean(daily) / (np.std(daily) + 1e-12)) * np.sqrt(252))
+    mdd = float(max_drawdown(equity))
+    return total_return, vol, sharpe, mdd
+
+
 def main():
     cfg = _load_config("configs/base_config.yml")
 
+    # Required config
     tickers = cfg["universe"]["tickers"]
     start = cfg["dates"]["start"]
     end = cfg["dates"]["end"]
 
+    # Optional strategy params from config
+    strat_cfg = cfg.get("strategy", {})
+    lookback = int(strat_cfg.get("lookback", 20))
+    top_k_cfg = int(strat_cfg.get("top_k", 3))
+
+    # Optional cost params from config
+    cost_bps = float(cfg.get("costs", {}).get("cost_bps", 0.0))
+
+    # Load market data (cached if available)
     data = load_close_matrix(tickers, start, end)
 
-    strategy = CrossSectionalMomentum(lookback=20, top_k=min(3, len(data.tickers)))
+    # Clamp top_k to universe size
+    top_k = min(top_k_cfg, len(data.tickers))
+
+    # Strategy: cross-sectional momentum
+    strategy = CrossSectionalMomentum(lookback=lookback, top_k=top_k)
     engine = BacktestEngine()
 
+    # Run backtest
     t0 = time.perf_counter()
-    res = engine.run(data.close, strategy)
+    res = engine.run(close=data.close, strategy=strategy, cost_bps=cost_bps)
     t1 = time.perf_counter()
 
     print(f"Backtest runtime: {(t1 - t0) * 1000:.1f} ms")
-
-    total_return = res.equity[-1] - 1.0
-    vol = np.std(res.daily_ret) * np.sqrt(252)
-    sharpe = (np.mean(res.daily_ret) / (np.std(res.daily_ret) + 1e-12)) * np.sqrt(252)
-    mdd = max_drawdown(res.equity)
-
     print("Backtest complete")
     print("Tickers:", data.tickers)
-    print(f"Total return: {total_return:.2%}")
-    print(f"Annualized vol: {vol:.2%}")
-    print(f"Sharpe (naive): {sharpe:.2f}")
-    print(f"Max drawdown: {mdd:.2%}")
 
+    # Gross vs Net metrics
+    tr_g, vol_g, sh_g, mdd_g = _metrics(res.daily_gross, res.equity_gross)
+    tr_n, vol_n, sh_n, mdd_n = _metrics(res.daily_net, res.equity_net)
+
+    avg_turnover = float(res.turnover.mean())
+    avg_cost_bps = float(res.costs.mean() * 1e4)
+
+    print("\nConfig")
+    print(f"lookback: {lookback}")
+    print(f"top_k: {top_k}")
+    print(f"cost_bps: {cost_bps:.2f}")
+
+    print("\nGROSS (no costs)")
+    print(f"Total return: {tr_g:.2%}")
+    print(f"Annualized vol: {vol_g:.2%}")
+    print(f"Sharpe (naive): {sh_g:.2f}")
+    print(f"Max drawdown: {mdd_g:.2%}")
+
+    print("\nNET (with costs)")
+    print(f"Cost model: cost_bps={cost_bps:.2f} applied to turnover")
+    print(f"Total return: {tr_n:.2%}")
+    print(f"Annualized vol: {vol_n:.2%}")
+    print(f"Sharpe (naive): {sh_n:.2f}")
+    print(f"Max drawdown: {mdd_n:.2%}")
+
+    print("\nTrading frictions")
+    print(f"Avg daily turnover: {avg_turnover:.3f}")
+    print(f"Avg daily cost: {avg_cost_bps:.2f} bps")
+
+    # Plot equity curves
     plt.figure()
-    plt.plot(res.equity)
-    plt.title("Equity Curve (Momentum, MVP)")
+    plt.plot(res.equity_gross, label="Gross")
+    plt.plot(res.equity_net, label="Net")
+    plt.title("Equity Curve (Cross-Sectional Momentum)")
     plt.xlabel("Days")
     plt.ylabel("Equity")
+    plt.legend()
     plt.show()
 
 
