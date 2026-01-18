@@ -16,6 +16,22 @@ class MarketData:
     close: np.ndarray      # shape [T, N]
 
 
+def _print_progress(i: int, n: int, next_pct: int) -> int:
+    """
+    Print progress every 10% while loading tickers.
+    Returns the next percentage threshold to print.
+    """
+    # For small N, percent printing isn't helpful (too noisy / trivial)
+    if n < 20:
+        return next_pct
+
+    pct = int((i * 100) / n)
+    if pct >= next_pct:
+        print(f"Loading stocks: {pct}% ({i}/{n})")
+        return next_pct + 10
+    return next_pct
+
+
 def _candidate_filenames(ticker: str) -> List[str]:
     """
     Local Stooq US stock files:
@@ -169,6 +185,9 @@ def load_close_matrix(
     Local-only loader (development mode).
     Uses ONLY NASDAQ stocks:
       nasdaq_stocks_root/{1,2,3,...}/*.us.txt
+
+    Progress:
+      - Prints progress at 10%, 20%, ..., 100% (for N >= 20)
     """
     shard_dirs = _find_shard_dirs(nasdaq_stocks_root)
 
@@ -197,11 +216,13 @@ def load_close_matrix(
 
     start_dt = pd.to_datetime(start)
     end_dt = pd.to_datetime(end)
+
     total = len(tickers)
+    next_pct = 10
 
     for i, ticker in enumerate(tickers, start=1):
-        if i == 1 or i % 10 == 0 or i == total:
-            print(f"[{i}/{total}] loading {ticker}...")
+        # Progress indicator
+        next_pct = _print_progress(i, total, next_pct)
 
         loaded = False
         last_err = None

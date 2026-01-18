@@ -1,15 +1,9 @@
 universe:
-  tickers:
-    - AAPL
-    - MSFT
-    - AMZN
-    - META
-    - NVDA
-    - GOOGL
-    - TSLA
-    - AVGO
-    - COST
-    - NFLX
+    mode: folder
+    root: data_raw/stooq_us_daily/daily/us/nasdaq_stocks
+    max_tickers: 500
+    seed: 42
+    min_days_in_range: 220
 
 data:
   source: "stooq"
@@ -17,15 +11,16 @@ data:
   
 dates:
   start: "2025-01-01"
-  end: "2026-12-31"
+  end: "2025-12-31"
 
 execution:
   trade_at: "next_close"
 
 costs:
-  commission_bps: 1.0
-  slippage_bps: 1.0
   cost_bps: 10.0
+  commission_bps: 1.0
+  slippage_bps: 2.0
+  impact_k: 0.0005
 
 strategy:
   name: cross_sectional_momentum
