@@ -6,6 +6,8 @@ explicit execution timing, transaction costs, and scalable universe selection.
 ![CI](https://github.com/SB-231/systematic-equity-backtester/actions/workflows/ci.yml/badge.svg)
 
 ---
+***
+___
 
 ## Overview
 
@@ -37,25 +39,36 @@ This project focuses on infrastructure correctness and performance, not on optim
 ## Repository structure
 
 ```text
-backtester/
-  core/
-    engine.py        # Vectorized backtest engine + costs + turnover
-  data/
-    loader.py        # Local Stooq loader, alignment, caching
-  strategies/
-    base.py          # Strategy interface
-    momentum.py      # Cross-sectional momentum strategy
-  universe.py        # Universe discovery, coverage filter, caching
+.
+├── backtester
+│   ├── core
+│   │   └── engine.py            # Vectorized engine: weights→PnL + turnover + costs
+│   ├── data
+│   │   └── loader.py            # Local Stooq loader + alignment + caching
+│   ├── strategies
+│   │   ├── base.py              # Strategy interface
+│   │   └── momentum.py          # Cross-sectional momentum strategy
+│   └── universe.py              # Universe discovery + coverage filter + caching
+│
+├── benchmarks
+│   ├── __init__.py
+│   └── benchmark.py             # Cold/warm/engine-only benchmarks
+│
+├── configs
+│   └── base_config.yml          # Universe, dates, strategy, cost params
+│
+├── tests
+│   └── test_engine.py           # Timing + turnover + cost accounting tests
+│
+├── .github
+│   └── workflows
+│       └── ci.yml               # GitHub Actions CI (pytest)
+│
+├── run_backtest.py              # End-to-end run + metrics + memory/timing report
+├── requirements.txt
+├── .gitignore
+└── README.md
 
-benchmarks/
-  benchmark.py       # Cold/warm/engine-only timing benchmarks
-
-tests/
-  test_engine.py     # Accounting, timing, turnover correctness tests
-
-run_backtest.py      # End-to-end backtest + metrics + memory report
-configs/
-  base_config.yml    # All run parameters
 ```
 ---
 
