@@ -6,8 +6,6 @@ explicit execution timing, transaction costs, and scalable universe selection.
 ![CI](https://github.com/SB-231/systematic-equity-backtester/actions/workflows/ci.yml/badge.svg)
 
 ---
-***
-___
 
 ## Overview
 
